@@ -15,9 +15,10 @@ builder.Host.ConfigureServices(services =>
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
-// Configure Data Protection with in-memory keys
+// Configure Data Protection with minimum key lifetime
 builder.Services.AddDataProtection()
-    .SetDefaultKeyLifetime(TimeSpan.FromDays(1));  // Set shorter key lifetime
+    .SetApplicationName("LoginApp")
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(7)); // Minimum allowed is 7 days
 
 // Add Authentication with secure cookie settings
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
