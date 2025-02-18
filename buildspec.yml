@@ -41,6 +41,7 @@ phases:
               "retries": 3,
               "startPeriod": 60
             },
+            "stopTimeout": 30,
             "environment": [
               {
                 "name": "ASPNETCORE_ENVIRONMENT",
