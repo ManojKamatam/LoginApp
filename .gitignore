@@ -1,0 +1,13 @@
+## .NET Core
+bin/
+obj/
+*.user
+*.userosscache
+*.suo
+*.dbmdl
+*.jfm
+.vs/
+.vscode/
+
+## Docker
+.docker/
