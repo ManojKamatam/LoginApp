@@ -5,22 +5,21 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
-      - echo Creating image definitions file...
+      - docker system prune -a -f
       
   build:
     commands:
       - echo Build started on `date`
       - echo Building the Docker image...
-      - docker build -t loginapp .
-      - docker tag loginapp:latest $ECR_REPOSITORY_URI:latest
+      - docker build --no-cache --pull -t ${ECR_REPOSITORY_URI}:latest .
       
   post_build:
     commands:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
-      - docker push $ECR_REPOSITORY_URI:latest
+      - docker push ${ECR_REPOSITORY_URI}:latest
       - echo Writing image definitions file...
-      -|
+      - |
         echo '[
           {
             "name": "loginapp",
@@ -63,7 +62,7 @@ phases:
           "cpu": "1024",
           "memory": "3072",
           "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}",
-          "taskRoleArn": "${ECS_TASK-ROLE_ARN}
+          "taskRoleArn": "${ECS_TASK_ROLE_ARN}"
         }
         EOF
       - echo Writing appspec file...
@@ -80,7 +79,7 @@ phases:
                   ContainerPort: 80
                 PlatformVersion: "LATEST"
         EOF
-      - cat imageDefinitions.json
+      - cat imagedefinitions.json
       - cat appspec.yaml
 
 artifacts:
