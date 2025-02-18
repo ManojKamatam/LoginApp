@@ -11,7 +11,7 @@ phases:
         echo '{
           "containerDefinitions": [{
             "name": "loginapp",
-            "imageUri": "'${ECR_REPOSITORY_URI}:${IMAGE_TAG}'"
+            "imageUri": "'${ECR_REPOSITORY_URI}:latest'"
           }]
         }' > imageDefinitions.json
       
@@ -33,7 +33,7 @@ phases:
           "family": "login-app",
           "containerDefinitions": [{
             "name": "loginapp",
-            "image": "${ECR_REPOSITORY_URI}:${IMAGE_TAG}",
+            "image": "${ECR_REPOSITORY_URI}:latest",
             "essential": true,
             "portMappings": [{
               "name": "loginapp",
