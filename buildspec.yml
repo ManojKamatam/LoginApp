@@ -64,7 +64,22 @@ phases:
           "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}"
         }
         EOF
+      - echo Writing appspec file...
+      - |
+        cat << EOF > appspec.yaml
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: <TASK_DEFINITION>
+                LoadBalancerInfo:
+                  ContainerName: "loginapp"
+                  ContainerPort: 80
+                PlatformVersion: "LATEST"
+        EOF
       - cat imageDefinitions.json
+      - cat appspec.yaml
 
 artifacts:
   files:
