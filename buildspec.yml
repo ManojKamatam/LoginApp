@@ -33,7 +33,7 @@ phases:
       - |
         cat << EOF > taskdef.json
         {
-          "family": "loginapp",
+          "family": "login-app",
           "containerDefinitions": [{
             "name": "loginapp",
             "image": "${ECR_REPOSITORY_URI}:${IMAGE_TAG}",
