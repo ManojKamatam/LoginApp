@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +15,9 @@ builder.Host.ConfigureServices(services =>
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
-// Configure Data Protection without persistence
+// Configure Data Protection with in-memory keys
 builder.Services.AddDataProtection()
-    .DisableAutomaticKeyGeneration();
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(1));  // Set shorter key lifetime
 
 // Add Authentication with secure cookie settings
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
