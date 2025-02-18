@@ -21,12 +21,12 @@ phases:
       - docker push $ECR_REPOSITORY_URI:latest
       - echo Writing image definitions file...
       -|
-        echo '{
-          "containerDefinitions": [{
+        echo '[
+          {
             "name": "loginapp",
             "imageUri": "'${ECR_REPOSITORY_URI}:latest'"
-          }]
-        }' > imageDefinitions.json
+          }
+        ]' > imagedefinitions.json
       - echo Writing task definition file...
       - |
         cat << EOF > taskdef.json
