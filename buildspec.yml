@@ -6,13 +6,6 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
       - echo Creating image definitions file...
-      - |
-        echo '{
-          "containerDefinitions": [{
-            "name": "loginapp",
-            "imageUri": "'${ECR_REPOSITORY_URI}:latest'"
-          }]
-        }' > imageDefinitions.json
       
   build:
     commands:
@@ -26,6 +19,14 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker push $ECR_REPOSITORY_URI:latest
+      - echo Writing image definitions file...
+      -|
+        echo '{
+          "containerDefinitions": [{
+            "name": "loginapp",
+            "imageUri": "'${ECR_REPOSITORY_URI}:latest'"
+          }]
+        }' > imageDefinitions.json
       - echo Writing task definition file...
       - |
         cat << EOF > taskdef.json
