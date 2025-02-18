@@ -34,14 +34,16 @@ phases:
               "protocol": "tcp",
               "appProtocol": "http"
             }],
-            "healthCheck": {
-              "command": [ "CMD-SHELL", "curl -f http://localhost/health || exit 1" ],
-              "interval": 30,
-              "timeout": 5,
-              "retries": 3,
-              "startPeriod": 60
-            },
             "stopTimeout": 30,
+            "logConfiguration": {
+              "logDriver": "awslogs",
+              "options": {
+                "awslogs-group": "/ecs/loginapp",
+                "awslogs-region": "${AWS_DEFAULT_REGION}",
+                "awslogs-stream-prefix": "ecs"
+              }
+            }
+          }],
             "environment": [
               {
                 "name": "ASPNETCORE_ENVIRONMENT",
