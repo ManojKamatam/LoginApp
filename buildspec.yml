@@ -84,7 +84,7 @@ phases:
 
 artifacts:
   files:
-    - imageDefinitions.json
+    - imagedefinitions.json
     - taskdef.json
     - appspec.yaml
   discard-paths: yes
