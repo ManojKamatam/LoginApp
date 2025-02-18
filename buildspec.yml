@@ -61,7 +61,8 @@ phases:
           "networkMode": "awsvpc",
           "cpu": "256",
           "memory": "512",
-          "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}"
+          "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}",
+          "taskRoleArn": "${ECS_TASK-ROLE_ARN}"
         }
         EOF
       - echo Writing appspec file...
