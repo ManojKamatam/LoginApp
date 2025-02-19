@@ -23,14 +23,24 @@ phases:
       - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
       - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
 
-      # Register task definition properly
-      - echo "Registering new task definition..."
+      # Check if the latest task definition already exists
+      - echo "Checking existing task definition..."
       - |
-        TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
+        EXISTING_TASK_DEF=$(aws ecs list-task-definitions --family login-app --sort DESC --query "taskDefinitionArns[0]" --output text)
+        if [[ -z "$EXISTING_TASK_DEF" ]]; then
+          echo "No existing task definition found. Registering a new one..."
+          TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
+        else
+          echo "Using existing task definition: $EXISTING_TASK_DEF"
+          TASK_DEFINITION=$EXISTING_TASK_DEF
+        fi
         echo "TASK_DEFINITION=$TASK_DEFINITION"
-        if [[ -z "$TASK_DEFINITION" ]]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
 
-      # Create updated AppSpec file with new task definition ARN (Fixed YAML formatting)
+      # Update ECS service to use the correct task definition revision
+      - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
+      - aws ecs update-service --cluster your-cluster-name --service your-service-name --task-definition $TASK_DEFINITION
+
+      # Create updated AppSpec file with locked Task Definition ARN
       - echo "Creating updated AppSpec file..."
       - |
         cat <<EOF > appspec.yaml
