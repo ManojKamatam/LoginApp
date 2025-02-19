@@ -22,7 +22,24 @@ phases:
       - echo Creating imagedefinitions.json...
       - printf '[{"name":"loginapp","imageUri":"%s"}]' ${ECR_REPOSITORY_URI}:latest > imagedefinitions.json
       
-      # Generate appspec.yaml
+      # Process and update taskdef.json with environment variables
+      - echo Processing task definition...
+      - |
+        sed -i \
+          -e "s|\${ECR_REPOSITORY_URI}|${ECR_REPOSITORY_URI}|g" \
+          -e "s|\${AWS_DEFAULT_REGION}|${AWS_DEFAULT_REGION}|g" \
+          -e "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" \
+          -e "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" \
+          taskdef.json
+      
+      # Validate JSON syntax after substitution
+      - jq empty taskdef.json || (echo "ERROR: taskdef.json is not valid JSON!" && exit 1)
+      
+      # Register the new task definition
+      - echo Registering new task definition...
+      - TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text)
+      
+      # Generate appspec.yaml with the new task definition
       - |
         cat << EOF > appspec.yaml
         version: 0.0
@@ -30,20 +47,12 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: <TASK_DEFINITION>
+                TaskDefinition: ${TASK_DEFINITION}
                 LoadBalancerInfo:
                   ContainerName: "loginapp"
                   ContainerPort: 80
                 PlatformVersion: "LATEST"
         EOF
-      
-      # Process task definition
-      - echo Processing task definition...
-      - if [ -f taskdef.json ]; then
-          jq empty taskdef.json && 
-          TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text);
-          sed -i "s|<TASK_DEFINITION>|$TASK_DEFINITION|g" appspec.yaml;
-        fi
 
 artifacts:
   files:
