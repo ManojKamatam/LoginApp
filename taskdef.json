@@ -103,7 +103,8 @@
         "/cws-instrumentation-volume/cws-instrumentation",
         "trace",
         "--",
-        "/app"  // Replace with the actual application entry point
+        "dotnet",
+        "/app/LoginApp.dll"  // Replace with the actual application entry point
       ],
       "portMappings": [
         {
