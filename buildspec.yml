@@ -37,20 +37,25 @@ phases:
 
       # Fetch the new task definition ARN
       - echo "Fetching latest task definition ARN..."
-      - TASK_DEF_ARN=$(aws ecs describe-task-definition --task-definition login-app --query "taskDefinition.taskDefinitionArn" --output text)
+      - |
+        TASK_DEF_ARN=$(aws ecs describe-task-definition --task-definition login-app --query "taskDefinition.taskDefinitionArn" --output text)
+        echo "TASK_DEF_ARN=$TASK_DEF_ARN"
 
-      # Create updated AppSpec file with new task definition ARN (Fixed YAML Syntax)
+      # Create updated AppSpec file with new task definition ARN
       - echo "Writing updated AppSpec file..."
-      - echo "version: 0.0" > appspec.yaml
-      - echo "Resources:" >> appspec.yaml
-      - echo "  - TargetService:" >> appspec.yaml
-      - echo "      Type: AWS::ECS::Service" >> appspec.yaml
-      - echo "      Properties:" >> appspec.yaml
-      - echo "        TaskDefinition: \"$TASK_DEF_ARN\"" >> appspec.yaml
-      - echo "        LoadBalancerInfo:" >> appspec.yaml
-      - echo "          ContainerName: \"loginapp\"" >> appspec.yaml
-      - echo "          ContainerPort: 80" >> appspec.yaml
-      - echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
+      - |
+        cat <<EOF > appspec.yaml
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: "$TASK_DEF_ARN"
+                LoadBalancerInfo:
+                  ContainerName: "loginapp"
+                  ContainerPort: 80
+                PlatformVersion: "LATEST"
+        EOF
 
       # Display generated files for debugging
       - cat imagedefinitions.json
