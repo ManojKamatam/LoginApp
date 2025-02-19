@@ -47,18 +47,16 @@ phases:
       # Create updated AppSpec file correctly
       - echo "Creating updated AppSpec file..."
       - |
-        cat <<EOF > appspec.yaml
-        version: 0.0
-        Resources:
-          - TargetService:
-              Type: AWS::ECS::Service
-              Properties:
-                TaskDefinition: "$TASK_DEFINITION"
-                LoadBalancerInfo:
-                  ContainerName: "loginapp"
-                  ContainerPort: 80
-                PlatformVersion: "LATEST"
-EOF
+        echo "version: 0.0" > appspec.yaml
+        echo "Resources:" >> appspec.yaml
+        echo "  - TargetService:" >> appspec.yaml
+        echo "      Type: AWS::ECS::Service" >> appspec.yaml
+        echo "      Properties:" >> appspec.yaml
+        echo "        TaskDefinition: \"$TASK_DEFINITION\"" >> appspec.yaml
+        echo "        LoadBalancerInfo:" >> appspec.yaml
+        echo "          ContainerName: \"loginapp\"" >> appspec.yaml
+        echo "          ContainerPort: 80" >> appspec.yaml
+        echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
 
       # Display generated files for debugging
       - cat imagedefinitions.json
