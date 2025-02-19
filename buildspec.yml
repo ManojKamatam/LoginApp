@@ -31,7 +31,7 @@ phases:
         if [[ -z "$TASK_DEFINITION" ]]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
 
       # Ensure ECS service uses this task definition
-      - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
+      # - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
       - aws ecs update-service --cluster LoginApp --service LoginApp --task-definition "$TASK_DEFINITION" --force-new-deployment
 
       # Create updated AppSpec file with new task definition ARN (Fixed formatting)
