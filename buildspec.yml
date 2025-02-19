@@ -3,17 +3,17 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "Logging in to Amazon ECR..."
+      - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
   
   build:
     commands:
-      - echo "Build started on $(date)"
+      - echo Build started on `date`
       - docker build --no-cache --pull -t ${ECR_REPOSITORY_URI}:latest .
   
   post_build:
     commands:
-      - echo "Build completed on $(date)"
+      - echo Build completed on `date`
       - docker push ${ECR_REPOSITORY_URI}:latest
       - echo "[{\"name\":\"loginapp\",\"imageUri\":\"${ECR_REPOSITORY_URI}:latest\"}]" > imagedefinitions.json
 
@@ -23,18 +23,12 @@ phases:
       - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
       - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
 
-      # Register task definition only if needed
-      - echo "Checking existing task definition..."
+      # Register task definition properly
+      - echo "Registering new task definition..."
       - |
-        EXISTING_TASK_DEF=$(aws ecs list-task-definitions --family login-app --sort DESC --query "taskDefinitionArns[0]" --output text)
-        if [[ "$EXISTING_TASK_DEF" == "None" || -z "$EXISTING_TASK_DEF" ]]; then
-          echo "No existing task definition found. Registering a new one..."
-          TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
-        else
-          echo "Using existing task definition: $EXISTING_TASK_DEF"
-          TASK_DEFINITION=$EXISTING_TASK_DEF
-        fi
+        TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
         echo "TASK_DEFINITION=$TASK_DEFINITION"
+        if [[ -z "$TASK_DEFINITION" ]]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
 
       # Ensure ECS service uses this task definition
       - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
@@ -44,7 +38,8 @@ phases:
       - echo "Forcing ECS service to restart tasks..."
       - aws ecs update-service --cluster LoginApp --service LoginApp --force-new-deployment
 
-      # Create updated AppSpec file correctly
+
+      # Create updated AppSpec file with new task definition ARN (Fixed formatting)
       - echo "Creating updated AppSpec file..."
       - |
         echo "version: 0.0" > appspec.yaml
