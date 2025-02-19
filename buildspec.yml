@@ -3,17 +3,17 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
+      - echo "Logging in to Amazon ECR..."
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
   
   build:
     commands:
-      - echo Build started on `date`
+      - echo "Build started on $(date)"
       - docker build --no-cache --pull -t ${ECR_REPOSITORY_URI}:latest .
   
   post_build:
     commands:
-      - echo Build completed on `date`
+      - echo "Build completed on $(date)"
       - docker push ${ECR_REPOSITORY_URI}:latest
       - echo "[{\"name\":\"loginapp\",\"imageUri\":\"${ECR_REPOSITORY_URI}:latest\"}]" > imagedefinitions.json
 
@@ -23,30 +23,28 @@ phases:
       - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
       - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
 
-      # Register task definition and lock to this revision
+      # Register task definition properly
       - echo "Registering new task definition..."
       - |
         TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
         echo "TASK_DEFINITION=$TASK_DEFINITION"
         if [[ -z "$TASK_DEFINITION" ]]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
 
-      # Ensure the ECS service updates to use only this revision
-      - echo "Updating ECS service to use Task Definition Revision: $TASK_DEFINITION"
-      - aws ecs update-service --cluster your-cluster-name --service your-service-name --task-definition $TASK_DEFINITION
-
-      # Create updated AppSpec file with locked Task Definition ARN
+      # Create updated AppSpec file with new task definition ARN (Fixed YAML formatting)
       - echo "Creating updated AppSpec file..."
       - |
-        echo "version: 0.0" > appspec.yaml
-        echo "Resources:" >> appspec.yaml
-        echo "  - TargetService:" >> appspec.yaml
-        echo "      Type: AWS::ECS::Service" >> appspec.yaml
-        echo "      Properties:" >> appspec.yaml
-        echo "        TaskDefinition: \"$TASK_DEFINITION\"" >> appspec.yaml
-        echo "        LoadBalancerInfo:" >> appspec.yaml
-        echo "          ContainerName: \"loginapp\"" >> appspec.yaml
-        echo "          ContainerPort: 80" >> appspec.yaml
-        echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
+        cat <<EOF > appspec.yaml
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: "$TASK_DEFINITION"
+                LoadBalancerInfo:
+                  ContainerName: "loginapp"
+                  ContainerPort: 80
+                PlatformVersion: "LATEST"
+        EOF
 
       # Display generated files for debugging
       - cat imagedefinitions.json
