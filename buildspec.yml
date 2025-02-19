@@ -40,9 +40,14 @@ phases:
       - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
       - aws ecs update-service --cluster LoginApp --service LoginApp --task-definition "$TASK_DEFINITION"
 
+      # Force ECS to refresh tasks using only the correct revision
+      - echo "Forcing ECS service to restart tasks..."
+      - aws ecs update-service --cluster LoginApp --service LoginApp --force-new-deployment
+
       # Create updated AppSpec file correctly
       - echo "Creating updated AppSpec file..."
-      - cat <<EOF > appspec.yaml
+      - |
+        cat <<EOF > appspec.yaml
 version: 0.0
 Resources:
   - TargetService:
