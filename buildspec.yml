@@ -25,7 +25,7 @@ phases:
 
       # Register task definition only if needed
       - echo "Checking existing task definition..."
-      - |
+      - >
         EXISTING_TASK_DEF=$(aws ecs list-task-definitions --family login-app --sort DESC --query "taskDefinitionArns[0]" --output text)
         if [[ "$EXISTING_TASK_DEF" == "None" || -z "$EXISTING_TASK_DEF" ]]; then
           echo "No existing task definition found. Registering a new one..."
@@ -46,7 +46,7 @@ phases:
 
       # Create updated AppSpec file correctly
       - echo "Creating updated AppSpec file..."
-      - |
+      - >
         echo "version: 0.0" > appspec.yaml
         echo "Resources:" >> appspec.yaml
         echo "  - TargetService:" >> appspec.yaml
