@@ -26,9 +26,9 @@ phases:
       - echo "Validating taskdef.json content..."
       - cat taskdef.json
 
-      # Validate JSON syntax before registration (install jq if not available)
+      # Validate JSON syntax before registration (install jq if missing)
       - echo "Checking JSON syntax..."
-      - yum install -y jq || apt-get install -y jq
+      - which jq || yum install -y jq || apt-get install -y jq
       - jq empty taskdef.json || (echo "ERROR: taskdef.json is not valid JSON!" && exit 1)
 
       # Register the new task definition revision
@@ -39,20 +39,18 @@ phases:
       - echo "Fetching latest task definition ARN..."
       - TASK_DEF_ARN=$(aws ecs describe-task-definition --task-definition login-app --query "taskDefinition.taskDefinitionArn" --output text)
 
-      # Create updated AppSpec file with new task definition ARN
+      # Create updated AppSpec file with new task definition ARN (Fixed YAML Syntax)
       - echo "Writing updated AppSpec file..."
-      - cat <<EOF > appspec.yaml
-        version: 0.0
-        Resources:
-          - TargetService:
-              Type: AWS::ECS::Service
-              Properties:
-                TaskDefinition: "$TASK_DEF_ARN"
-                LoadBalancerInfo:
-                  ContainerName: "loginapp"
-                  ContainerPort: 80
-                PlatformVersion: "LATEST"
-        EOF
+      - echo "version: 0.0" > appspec.yaml
+      - echo "Resources:" >> appspec.yaml
+      - echo "  - TargetService:" >> appspec.yaml
+      - echo "      Type: AWS::ECS::Service" >> appspec.yaml
+      - echo "      Properties:" >> appspec.yaml
+      - echo "        TaskDefinition: \"$TASK_DEF_ARN\"" >> appspec.yaml
+      - echo "        LoadBalancerInfo:" >> appspec.yaml
+      - echo "          ContainerName: \"loginapp\"" >> appspec.yaml
+      - echo "          ContainerPort: 80" >> appspec.yaml
+      - echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
 
       # Display generated files for debugging
       - cat imagedefinitions.json
