@@ -15,14 +15,13 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing the Docker image...
       - docker push ${ECR_REPOSITORY_URI}:latest
-      - echo Creating imagedefinitions.json...
       - printf '[{"name":"loginapp","imageUri":"%s"}]' ${ECR_REPOSITORY_URI}:latest > imagedefinitions.json
-      - echo Processing task definition...
-      - sed -i -e "s|\${ECR_REPOSITORY_URI}|${ECR_REPOSITORY_URI}|g" -e "s|\${AWS_DEFAULT_REGION}|${AWS_DEFAULT_REGION}|g" -e "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" -e "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
-      - jq empty taskdef.json || (echo "ERROR: taskdef.json is not valid JSON!" && exit 1)
-      - echo Registering new task definition...
+      - sed -i "s|\${ECR_REPOSITORY_URI}|${ECR_REPOSITORY_URI}|g" taskdef.json
+      - sed -i "s|\${AWS_DEFAULT_REGION}|${AWS_DEFAULT_REGION}|g" taskdef.json
+      - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
+      - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
+      - jq empty taskdef.json
       - TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text)
       - echo "version: 0.0" > appspec.yaml
       - echo "Resources:" >> appspec.yaml
