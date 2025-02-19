@@ -17,53 +17,39 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker push ${ECR_REPOSITORY_URI}:latest
-
-      # Generate imagedefinitions.json dynamically
-      - echo "Creating imagedefinitions.json..."
+      
+      # Generate imagedefinitions.json
+      - echo Creating imagedefinitions.json...
       - printf '[{"name":"loginapp","imageUri":"%s"}]' ${ECR_REPOSITORY_URI}:latest > imagedefinitions.json
-
-      # Debugging: Check the content of taskdef.json before registering
-      - echo "Validating taskdef.json content..."
-      - cat taskdef.json
-
-      # Validate JSON syntax before registration
-      - echo "Checking JSON syntax..."
-      - which jq || yum install -y jq || apt-get install -y jq
-      - jq empty taskdef.json || (echo "ERROR: taskdef.json is not valid JSON!" && exit 1)
-
-      # Register the new task definition revision
-      - echo "Registering new task definition..."
-      - aws ecs register-task-definition --cli-input-json file://taskdef.json || (echo "ERROR: Task definition registration failed!" && exit 1)
-
-      # Fetch the new task definition ARN
-      - echo "Fetching latest task definition ARN..."
-      - TASK_DEF_ARN=$(aws ecs describe-task-definition --task-definition login-app --query "taskDefinition.taskDefinitionArn" --output text)
-      - echo "TASK_DEF_ARN=$TASK_DEF_ARN"
-
-      # Create updated AppSpec file with new task definition ARN (Fixed formatting)
-      - echo "Writing updated AppSpec file..."
+      
+      # Generate appspec.yaml
       - |
-        echo "version: 0.0" > appspec.yaml
-        echo "Resources:" >> appspec.yaml
-        echo "  - TargetService:" >> appspec.yaml
-        echo "      Type: AWS::ECS::Service" >> appspec.yaml
-        echo "      Properties:" >> appspec.yaml
-        echo "        TaskDefinition: \"$TASK_DEF_ARN\"" >> appspec.yaml
-        echo "        LoadBalancerInfo:" >> appspec.yaml
-        echo "          ContainerName: \"loginapp\"" >> appspec.yaml
-        echo "          ContainerPort: 80" >> appspec.yaml
-        echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
-
-      # Display generated files for debugging
-      - cat imagedefinitions.json
-      - cat taskdef.json
-      - cat appspec.yaml
+        cat << EOF > appspec.yaml
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: <TASK_DEFINITION>
+                LoadBalancerInfo:
+                  ContainerName: "loginapp"
+                  ContainerPort: 80
+                PlatformVersion: "LATEST"
+        EOF
+      
+      # Process task definition
+      - echo Processing task definition...
+      - if [ -f taskdef.json ]; then
+          jq empty taskdef.json && 
+          TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text);
+          sed -i "s|<TASK_DEFINITION>|$TASK_DEFINITION|g" appspec.yaml;
+        fi
 
 artifacts:
   files:
     - imagedefinitions.json
-    - taskdef.json
     - appspec.yaml
+    - taskdef.json
   discard-paths: yes
 
 cache:
