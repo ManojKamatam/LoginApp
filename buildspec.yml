@@ -7,28 +7,28 @@ phases:
   
   build:
     commands:
-      - docker build --no-cache --pull -t ${ECR_REPOSITORY_URI}:latest .
+      - docker build -t $ECR_REPOSITORY_URI:latest .
   
   post_build:
     commands:
-      - docker push ${ECR_REPOSITORY_URI}:latest
-      - echo "[{\"name\":\"loginapp\",\"imageUri\":\"${ECR_REPOSITORY_URI}:latest\"}]" > imagedefinitions.json
-      - sed -i "s|\${ECR_REPOSITORY_URI}|${ECR_REPOSITORY_URI}|g" taskdef.json
-      - sed -i "s|\${AWS_DEFAULT_REGION}|${AWS_DEFAULT_REGION}|g" taskdef.json
-      - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
-      - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
+      - docker push $ECR_REPOSITORY_URI:latest
+      - printf '[{"name":"loginapp","imageUri":"%s"}]' $ECR_REPOSITORY_URI:latest > imagedefinitions.json
+      - sed -i "s|\${ECR_REPOSITORY_URI}|$ECR_REPOSITORY_URI|g" taskdef.json
+      - sed -i "s|\${AWS_DEFAULT_REGION}|$AWS_DEFAULT_REGION|g" taskdef.json
+      - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|$ECS_EXECUTION_ROLE_ARN|g" taskdef.json
+      - sed -i "s|\${ECS_TASK_ROLE_ARN}|$ECS_TASK_ROLE_ARN|g" taskdef.json
       - aws ecs register-task-definition --cli-input-json file://taskdef.json > task-output.json
       - aws ecs update-service --cluster LoginApp --service LoginApp --task-definition login-app:1 --force-new-deployment
-      - echo "version: 0.0" > appspec.yaml
-      - echo "Resources:" >> appspec.yaml
-      - echo "  - TargetService:" >> appspec.yaml
-      - echo "      Type: AWS::ECS::Service" >> appspec.yaml
-      - echo "      Properties:" >> appspec.yaml
-      - echo "        TaskDefinition: login-app:1" >> appspec.yaml
-      - echo "        LoadBalancerInfo:" >> appspec.yaml
-      - echo "          ContainerName: \"loginapp\"" >> appspec.yaml
-      - echo "          ContainerPort: 80" >> appspec.yaml
-      - echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
+      - printf 'version: 0.0\n' > appspec.yaml
+      - printf 'Resources:\n' >> appspec.yaml
+      - printf '  - TargetService:\n' >> appspec.yaml
+      - printf '      Type: AWS::ECS::Service\n' >> appspec.yaml
+      - printf '      Properties:\n' >> appspec.yaml
+      - printf '        TaskDefinition: login-app:1\n' >> appspec.yaml
+      - printf '        LoadBalancerInfo:\n' >> appspec.yaml
+      - printf '          ContainerName: "loginapp"\n' >> appspec.yaml
+      - printf '          ContainerPort: 80\n' >> appspec.yaml
+      - printf '        PlatformVersion: "LATEST"\n' >> appspec.yaml
 
 artifacts:
   files:
