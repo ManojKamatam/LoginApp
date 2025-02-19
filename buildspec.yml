@@ -23,7 +23,7 @@ phases:
       - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
       - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
 
-      # Check if the latest task definition already exists
+      # Ensure the latest task definition is registered only once
       - echo "Checking existing task definition..."
       - |
         EXISTING_TASK_DEF=$(aws ecs list-task-definitions --family login-app --sort DESC --query "taskDefinitionArns[0]" --output text)
@@ -36,7 +36,7 @@ phases:
         fi
         echo "TASK_DEFINITION=$TASK_DEFINITION"
 
-      # Update ECS service to use the correct task definition revision
+      # Ensure ECS service uses only this task definition
       - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
       - aws ecs update-service --cluster your-cluster-name --service your-service-name --task-definition $TASK_DEFINITION
 
