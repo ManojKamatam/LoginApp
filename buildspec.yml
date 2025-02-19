@@ -38,7 +38,7 @@ phases:
 
       # Ensure ECS service uses this task definition
       - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
-      - aws ecs update-service --cluster your-cluster-name --service your-service-name --task-definition "$TASK_DEFINITION"
+      - aws ecs update-service --cluster LoginApp --service LoginApp --task-definition "$TASK_DEFINITION"
 
       # Create updated AppSpec file correctly
       - echo "Creating updated AppSpec file..."
