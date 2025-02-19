@@ -22,9 +22,17 @@ phases:
       - echo Creating imagedefinitions.json...
       - printf '[{"name":"loginapp","imageUri":"%s"}]' ${ECR_REPOSITORY_URI}:latest > imagedefinitions.json
   
+      # Debugging: Check the content of taskdef.json before registering
+      - echo "Validating taskdef.json content..."
+      - cat taskdef.json
+  
+      # Validate JSON syntax before registration
+      - echo "Checking JSON syntax..."
+      - jq empty taskdef.json || (echo "ERROR: taskdef.json is not valid JSON!" && exit 1)
+  
       # Register the new task definition revision
       - echo Registering new task definition...
-      - aws ecs register-task-definition --cli-input-json file://taskdef.json
+      - aws ecs register-task-definition --cli-input-json file://taskdef.json || (echo "ERROR: Task definition registration failed!" && exit 1)
   
       # Fetch the new task definition ARN
       - echo Fetching latest task definition ARN...
@@ -39,7 +47,7 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: <TASK_DEFINITION>
+                TaskDefinition: "$TASK_DEF_ARN"
                 LoadBalancerInfo:
                   ContainerName: "loginapp"
                   ContainerPort: 80
