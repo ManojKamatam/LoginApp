@@ -57,7 +57,7 @@ phases:
               "environment": [
                 {
                   "name": "DD_API_KEY",
-                  "value": "<YOUR_DATADOG_API_KEY>"
+                  "value": "24d4fd9b038e72e2beaaec1cdf2ab844"
                 },
                 {
                   "name": "ECS_FARGATE",
