@@ -24,17 +24,16 @@ phases:
       - jq empty taskdef.json || (echo "ERROR: taskdef.json is not valid JSON!" && exit 1)
       - echo Registering new task definition...
       - TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query 'taskDefinition.taskDefinitionArn' --output text)
-      - |
-        echo "version: 0.0" > appspec.yaml
-        echo "Resources:" >> appspec.yaml
-        echo "  - TargetService:" >> appspec.yaml
-        echo "      Type: AWS::ECS::Service" >> appspec.yaml
-        echo "      Properties:" >> appspec.yaml
-        echo "        TaskDefinition: ${TASK_DEFINITION}" >> appspec.yaml
-        echo "        LoadBalancerInfo:" >> appspec.yaml
-        echo "          ContainerName: \"loginapp\"" >> appspec.yaml
-        echo "          ContainerPort: 80" >> appspec.yaml
-        echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
+      - echo "version: 0.0" > appspec.yaml
+      - echo "Resources:" >> appspec.yaml
+      - echo "  - TargetService:" >> appspec.yaml
+      - echo "      Type: AWS::ECS::Service" >> appspec.yaml
+      - echo "      Properties:" >> appspec.yaml
+      - echo "        TaskDefinition: ${TASK_DEFINITION}" >> appspec.yaml
+      - echo "        LoadBalancerInfo:" >> appspec.yaml
+      - echo "          ContainerName: \"loginapp\"" >> appspec.yaml
+      - echo "          ContainerPort: 80" >> appspec.yaml
+      - echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
 
 artifacts:
   files:
