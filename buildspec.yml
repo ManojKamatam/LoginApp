@@ -47,7 +47,7 @@ phases:
           - TargetService:
               Type: AWS::ECS::Service
               Properties:
-                TaskDefinition: "$TASK_DEF_ARN"
+                TaskDefinition: <TASK_DEFINITION>
                 LoadBalancerInfo:
                   ContainerName: "loginapp"
                   ContainerPort: 80
