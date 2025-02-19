@@ -103,7 +103,7 @@
         "/cws-instrumentation-volume/cws-instrumentation",
         "trace",
         "--",
-        "/app/your-entrypoint"  // Replace with the actual application entry point
+        "/app"  // Replace with the actual application entry point
       ],
       "portMappings": [
         {
