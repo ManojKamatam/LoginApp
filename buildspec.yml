@@ -23,38 +23,37 @@ phases:
       - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
       - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
 
-      # Ensure the latest task definition is registered only once
+      # Check for the latest task definition
       - echo "Checking existing task definition..."
-      - |
-        EXISTING_TASK_DEF=$(aws ecs list-task-definitions --family login-app --sort DESC --query "taskDefinitionArns[0]" --output text)
-        if [[ -z "$EXISTING_TASK_DEF" ]]; then
-          echo "No existing task definition found. Registering a new one..."
-          TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
+      - EXISTING_TASK_DEF=$(aws ecs list-task-definitions --family login-app --sort DESC --query "taskDefinitionArns[0]" --output text)
+      
+      # Register a new task definition only if no existing definition is found
+      - if [[ -z "$EXISTING_TASK_DEF" ]]; then
+          echo "No existing task definition found. Registering a new one...";
+          TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text);
         else
-          echo "Using existing task definition: $EXISTING_TASK_DEF"
-          TASK_DEFINITION=$EXISTING_TASK_DEF
+          echo "Using existing task definition: $EXISTING_TASK_DEF";
+          TASK_DEFINITION=$EXISTING_TASK_DEF;
         fi
-        echo "TASK_DEFINITION=$TASK_DEFINITION"
+      - echo "TASK_DEFINITION=$TASK_DEFINITION"
 
-      # Ensure ECS service uses only this task definition
+      # Ensure ECS service uses this task definition
       - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
       - aws ecs update-service --cluster your-cluster-name --service your-service-name --task-definition $TASK_DEFINITION
 
-      # Create updated AppSpec file with locked Task Definition ARN
+      # Create updated AppSpec file (Fixed YAML Syntax)
       - echo "Creating updated AppSpec file..."
       - |
-        cat <<EOF > appspec.yaml
-        version: 0.0
-        Resources:
-          - TargetService:
-              Type: AWS::ECS::Service
-              Properties:
-                TaskDefinition: "$TASK_DEFINITION"
-                LoadBalancerInfo:
-                  ContainerName: "loginapp"
-                  ContainerPort: 80
-                PlatformVersion: "LATEST"
-        EOF
+        echo "version: 0.0" > appspec.yaml
+        echo "Resources:" >> appspec.yaml
+        echo "  - TargetService:" >> appspec.yaml
+        echo "      Type: AWS::ECS::Service" >> appspec.yaml
+        echo "      Properties:" >> appspec.yaml
+        echo "        TaskDefinition: \"$TASK_DEFINITION\"" >> appspec.yaml
+        echo "        LoadBalancerInfo:" >> appspec.yaml
+        echo "          ContainerName: \"loginapp\"" >> appspec.yaml
+        echo "          ContainerPort: 80" >> appspec.yaml
+        echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
 
       # Display generated files for debugging
       - cat imagedefinitions.json
