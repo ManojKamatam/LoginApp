@@ -27,7 +27,7 @@ phases:
       - echo "Checking existing task definition..."
       - |
         EXISTING_TASK_DEF=$(aws ecs list-task-definitions --family login-app --sort DESC --query "taskDefinitionArns[0]" --output text)
-        if [[ -z "$EXISTING_TASK_DEF" ]]; then
+        if [[ "$EXISTING_TASK_DEF" == "None" || -z "$EXISTING_TASK_DEF" ]]; then
           echo "No existing task definition found. Registering a new one..."
           TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
         else
