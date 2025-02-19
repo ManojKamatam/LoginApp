@@ -4,31 +4,29 @@ phases:
   pre_build:
     commands:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
-  
   build:
     commands:
       - docker build -t $ECR_REPOSITORY_URI:latest .
-  
   post_build:
     commands:
       - docker push $ECR_REPOSITORY_URI:latest
-      - printf '[{"name":"loginapp","imageUri":"%s"}]' $ECR_REPOSITORY_URI:latest > imagedefinitions.json
+      - printf '[{"name":"loginapp","imageUri":"%s"}]' "$ECR_REPOSITORY_URI:latest" > imagedefinitions.json
       - sed -i "s|\${ECR_REPOSITORY_URI}|$ECR_REPOSITORY_URI|g" taskdef.json
       - sed -i "s|\${AWS_DEFAULT_REGION}|$AWS_DEFAULT_REGION|g" taskdef.json
       - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|$ECS_EXECUTION_ROLE_ARN|g" taskdef.json
       - sed -i "s|\${ECS_TASK_ROLE_ARN}|$ECS_TASK_ROLE_ARN|g" taskdef.json
       - aws ecs register-task-definition --cli-input-json file://taskdef.json > task-output.json
       - aws ecs update-service --cluster LoginApp --service LoginApp --task-definition login-app:1 --force-new-deployment
-      - printf 'version: 0.0\n' > appspec.yaml
-      - printf 'Resources:\n' >> appspec.yaml
-      - printf '  - TargetService:\n' >> appspec.yaml
-      - printf '      Type: AWS::ECS::Service\n' >> appspec.yaml
-      - printf '      Properties:\n' >> appspec.yaml
-      - printf '        TaskDefinition: login-app:1\n' >> appspec.yaml
-      - printf '        LoadBalancerInfo:\n' >> appspec.yaml
-      - printf '          ContainerName: "loginapp"\n' >> appspec.yaml
-      - printf '          ContainerPort: 80\n' >> appspec.yaml
-      - printf '        PlatformVersion: "LATEST"\n' >> appspec.yaml
+      - printf "version: 0.0\n" > appspec.yaml
+      - printf "Resources:\n" >> appspec.yaml
+      - printf "  - TargetService:\n" >> appspec.yaml
+      - printf "      Type: AWS::ECS::Service\n" >> appspec.yaml
+      - printf "      Properties:\n" >> appspec.yaml
+      - printf "        TaskDefinition: login-app:1\n" >> appspec.yaml
+      - printf "        LoadBalancerInfo:\n" >> appspec.yaml
+      - printf "          ContainerName: \"loginapp\"\n" >> appspec.yaml
+      - printf "          ContainerPort: 80\n" >> appspec.yaml
+      - printf "        PlatformVersion: \"LATEST\"\n" >> appspec.yaml
 
 artifacts:
   files:
