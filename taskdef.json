@@ -16,22 +16,41 @@
         {
           "name": "ASPNETCORE_ENVIRONMENT",
           "value": "Production"
+        },
+        {
+          "name": "DD_AGENT_HOST",
+          "value": "127.0.0.1"
+        },
+        {
+          "name": "DD_ENV",
+          "value": "production"
+        },
+        {
+          "name": "DD_SERVICE",
+          "value": "loginapp"
+        },
+        {
+          "name": "DD_VERSION",
+          "value": "1.0.0"
         }
       ],
       "logConfiguration": {
-        "logDriver": "awslogs",
+        "logDriver": "awsfirelens",
         "options": {
-          "awslogs-group": "/ecs/login-app",
-          "awslogs-region": "${AWS_DEFAULT_REGION}",
-          "awslogs-stream-prefix": "ecs",
-          "awslogs-create-group": "true"
+          "Name": "datadog",
+          "Host": "http-intake.logs.datadoghq.com",
+          "TLS": "on",
+          "apikey": "24d4fd9b038e72e2beaaec1cdf2ab844",
+          "dd_service": "loginapp",
+          "dd_source": "aspnetcore",
+          "dd_env": "production"
         }
       }
     },
     {
       "name": "datadog-agent",
       "image": "public.ecr.aws/datadog/agent:latest",
-      "essential": false,
+      "essential": true,
       "environment": [
         {
           "name": "DD_API_KEY",
@@ -44,16 +63,38 @@
         {
           "name": "DD_SITE",
           "value": "datadoghq.com"
+        },
+        {
+          "name": "DD_APM_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "DD_APM_NON_LOCAL_TRAFFIC",
+          "value": "true"
+        },
+        {
+          "name": "DD_LOGS_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL",
+          "value": "true"
         }
       ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/datadog-agent",
-          "awslogs-region": "${AWS_DEFAULT_REGION}",
-          "awslogs-stream-prefix": "ecs",
-          "awslogs-create-group": "true"
+      "portMappings": [
+        {
+          "containerPort": 8126,
+          "hostPort": 8126,
+          "protocol": "tcp"
         }
+      ]
+    },
+    {
+      "name": "log-router",
+      "image": "amazon/aws-for-fluent-bit:latest",
+      "essential": true,
+      "firelensConfiguration": {
+        "type": "fluentbit"
       }
     }
   ],
