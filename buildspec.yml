@@ -17,77 +17,21 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker image...
       - docker push ${ECR_REPOSITORY_URI}:latest
-      - printf '[{"name":"loginapp","imageUri":"%s"}]' $ECR_REPOSITORY_URI:latest > imagedefinitions.json
-      - echo Writing task definition file...
-      - |
-        cat << EOF > taskdef.json
-        {
-          "family": "login-app",
-          "containerDefinitions": [
-            {
-              "name": "loginapp",
-              "image": "${ECR_REPOSITORY_URI}:latest",
-              "essential": true,
-              "portMappings": [
-                {
-                  "containerPort": 80,
-                  "hostPort": 80,
-                  "protocol": "tcp"
-                }
-              ],
-              "environment": [
-                {
-                  "name": "ASPNETCORE_ENVIRONMENT",
-                  "value": "Production"
-                }
-              ],
-              "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                  "awslogs-group": "/ecs/loginapp",
-                  "awslogs-region": "${AWS_DEFAULT_REGION}",
-                  "awslogs-stream-prefix": "ecs"
-                }
-              }
-            },
-            {
-              "name": "datadog-agent",
-              "image": "public.ecr.aws/datadog/agent:latest",
-              "essential": false,
-              "environment": [
-                {
-                  "name": "DD_API_KEY",
-                  "value": "24d4fd9b038e72e2beaaec1cdf2ab844"
-                },
-                {
-                  "name": "ECS_FARGATE",
-                  "value": "true"
-                },
-                {
-                  "name": "DD_SITE",
-                  "value": "datadoghq.com"
-                }
-              ],
-              "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                  "awslogs-group": "/ecs/datadog-agent",
-                  "awslogs-region": "${AWS_DEFAULT_REGION}",
-                  "awslogs-stream-prefix": "ecs"
-                }
-              }
-            }
-          ],
-          "requiresCompatibilities": ["FARGATE"],
-          "networkMode": "awsvpc",
-          "cpu": "1024",
-          "memory": "3072",
-          "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}",
-          "taskRoleArn": "${ECS_TASK_ROLE_ARN}"
-        }
-
-        EOF
-      - echo Writing appspec file...
+  
+      # Generate imagedefinitions.json dynamically
+      - echo Creating imagedefinitions.json...
+      - printf '[{"name":"loginapp","imageUri":"%s"}]' ${ECR_REPOSITORY_URI}:latest > imagedefinitions.json
+  
+      # Register the new task definition revision
+      - echo Registering new task definition...
+      - aws ecs register-task-definition --cli-input-json file://taskdef.json
+  
+      # Fetch the new task definition ARN
+      - echo Fetching latest task definition ARN...
+      - TASK_DEF_ARN=$(aws ecs describe-task-definition --task-definition login-app --query "taskDefinition.taskDefinitionArn" --output text)
+  
+      # Create updated AppSpec file with new task definition ARN
+      - echo Writing updated AppSpec file...
       - |
         cat << EOF > appspec.yaml
         version: 0.0
@@ -101,9 +45,12 @@ phases:
                   ContainerPort: 80
                 PlatformVersion: "LATEST"
         EOF
+  
+      # Display generated files for debugging
       - cat imagedefinitions.json
+      - cat taskdef.json
       - cat appspec.yaml
-
+      
 artifacts:
   files:
     - imagedefinitions.json
