@@ -104,7 +104,7 @@
         "trace",
         "--",
         "dotnet",
-        "/app/LoginApp.dll"  // Replace with the actual application entry point
+        "/app/LoginApp.dll" 
       ],
       "portMappings": [
         {
