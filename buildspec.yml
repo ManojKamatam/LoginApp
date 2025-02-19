@@ -23,14 +23,18 @@ phases:
       - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
       - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
 
-      # Register task definition properly
+      # Register task definition and lock to this revision
       - echo "Registering new task definition..."
       - |
         TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
         echo "TASK_DEFINITION=$TASK_DEFINITION"
         if [[ -z "$TASK_DEFINITION" ]]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
 
-      # Create updated AppSpec file with new task definition ARN (Fixed formatting)
+      # Ensure the ECS service updates to use only this revision
+      - echo "Updating ECS service to use Task Definition Revision: $TASK_DEFINITION"
+      - aws ecs update-service --cluster your-cluster-name --service your-service-name --task-definition $TASK_DEFINITION
+
+      # Create updated AppSpec file with locked Task Definition ARN
       - echo "Creating updated AppSpec file..."
       - |
         echo "version: 0.0" > appspec.yaml
