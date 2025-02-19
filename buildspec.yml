@@ -5,51 +5,20 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
-  
+
   build:
     commands:
       - echo Build started on `date`
       - docker build --no-cache --pull -t ${ECR_REPOSITORY_URI}:latest .
-  
+      - echo "Checking Docker ENTRYPOINT and CMD for debugging..."
+      - docker inspect ${ECR_REPOSITORY_URI}:latest -f '{{json .Config.Entrypoint}}'
+      - docker inspect ${ECR_REPOSITORY_URI}:latest -f '{{json .Config.Cmd}}'
+
   post_build:
     commands:
       - echo Build completed on `date`
       - docker push ${ECR_REPOSITORY_URI}:latest
       - echo "[{\"name\":\"loginapp\",\"imageUri\":\"${ECR_REPOSITORY_URI}:latest\"}]" > imagedefinitions.json
-
-      # Replace variables in taskdef.json
-      - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
-      - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
-
-      # Register task definition properly
-      - echo "Registering new task definition..."
-      - |
-        TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
-        echo "TASK_DEFINITION=$TASK_DEFINITION"
-        if [[ -z "$TASK_DEFINITION" ]]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
-
-      # Ensure ECS service uses this task definition
-      # - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
-      - aws ecs update-service --cluster LoginApp --service LoginApp --task-definition "$TASK_DEFINITION" --force-new-deployment
-
-      # Create updated AppSpec file with new task definition ARN (Fixed formatting)
-      - echo "Creating updated AppSpec file..."
-      - |
-        echo "version: 0.0" > appspec.yaml
-        echo "Resources:" >> appspec.yaml
-        echo "  - TargetService:" >> appspec.yaml
-        echo "      Type: AWS::ECS::Service" >> appspec.yaml
-        echo "      Properties:" >> appspec.yaml
-        echo "        TaskDefinition: \"$TASK_DEFINITION\"" >> appspec.yaml
-        echo "        LoadBalancerInfo:" >> appspec.yaml
-        echo "          ContainerName: \"loginapp\"" >> appspec.yaml
-        echo "          ContainerPort: 80" >> appspec.yaml
-        echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
-
-      # Display generated files for debugging
-      - cat imagedefinitions.json
-      - cat appspec.yaml
-      - cat taskdef.json
 
 artifacts:
   files:
@@ -57,7 +26,3 @@ artifacts:
     - appspec.yaml
     - taskdef.json
   discard-paths: yes
-
-cache:
-  paths:
-    - '/root/.nuget/**/*'
