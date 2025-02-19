@@ -23,7 +23,8 @@
         "options": {
           "awslogs-group": "/ecs/loginapp",
           "awslogs-region": "${AWS_DEFAULT_REGION}",
-          "awslogs-stream-prefix": "ecs"
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
         }
       }
     },
@@ -50,7 +51,8 @@
         "options": {
           "awslogs-group": "/ecs/datadog-agent",
           "awslogs-region": "${AWS_DEFAULT_REGION}",
-          "awslogs-stream-prefix": "ecs"
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
         }
       }
     }
