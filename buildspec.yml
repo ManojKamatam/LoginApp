@@ -32,12 +32,7 @@ phases:
 
       # Ensure ECS service uses this task definition
       - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
-      - aws ecs update-service --cluster LoginApp --service LoginApp --task-definition "$TASK_DEFINITION"
-
-      # Force ECS to refresh tasks using only the correct revision
-      - echo "Forcing ECS service to restart tasks..."
-      - aws ecs update-service --cluster LoginApp --service LoginApp --force-new-deployment
-
+      - aws ecs update-service --cluster LoginApp --service LoginApp --task-definition "$TASK_DEFINITION" --force-new-deployment
 
       # Create updated AppSpec file with new task definition ARN (Fixed formatting)
       - echo "Creating updated AppSpec file..."
