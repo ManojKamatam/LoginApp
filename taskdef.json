@@ -1,10 +1,110 @@
 {
   "family": "login-app",
+  "cpu": "1024",
+  "memory": "3072",
+  "networkMode": "awsvpc",
+  "pidMode": "task",
+  "requiresCompatibilities": ["FARGATE"],
+  "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}",
+  "taskRoleArn": "${ECS_TASK_ROLE_ARN}",
   "containerDefinitions": [
+    {
+      "name": "cws-instrumentation-init",
+      "image": "datadog/cws-instrumentation:latest",
+      "essential": false,
+      "user": "0",
+      "command": [
+        "/cws-instrumentation",
+        "setup",
+        "--cws-volume-mount",
+        "/cws-instrumentation-volume"
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "cws-instrumentation-volume",
+          "containerPath": "/cws-instrumentation-volume",
+          "readOnly": false
+        }
+      ]
+    },
+    {
+      "name": "datadog-agent",
+      "image": "public.ecr.aws/datadog/agent:latest",
+      "essential": true,
+      "environment": [
+        {
+          "name": "DD_API_KEY",
+          "value": "24d4fd9b038e72e2beaaec1cdf2ab844"
+        },
+        {
+          "name": "DD_SITE",
+          "value": "datadoghq.com"
+        },
+        {
+          "name": "ECS_FARGATE",
+          "value": "true"
+        },
+        {
+          "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "DD_APM_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "DD_APM_NON_LOCAL_TRAFFIC",
+          "value": "true"
+        },
+        {
+          "name": "DD_LOGS_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL",
+          "value": "true"
+        },
+        {
+          "name": "DD_TRACE_AGENT_PORT",
+          "value": "8126"
+        },
+        {
+          "name": "DD_APM_RECEIVER_PORT",
+          "value": "8126"
+        }
+      ],
+      "portMappings": [
+        {
+          "containerPort": 8126,
+          "hostPort": 8126,
+          "protocol": "tcp"
+        }
+      ],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "/probe.sh"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 2,
+        "startPeriod": 60
+      }
+    },
     {
       "name": "loginapp",
       "image": "${ECR_REPOSITORY_URI}:latest",
       "essential": true,
+      "entryPoint": [
+        "/cws-instrumentation-volume/cws-instrumentation",
+        "trace",
+        "--",
+        "/app/your-entrypoint"  // Replace with the actual application entry point
+      ],
       "portMappings": [
         {
           "containerPort": 80,
@@ -45,47 +145,29 @@
           "dd_source": "aspnetcore",
           "dd_env": "production"
         }
-      }
-    },
-    {
-      "name": "datadog-agent",
-      "image": "public.ecr.aws/datadog/agent:latest",
-      "essential": true,
-      "environment": [
+      },
+      "mountPoints": [
         {
-          "name": "DD_API_KEY",
-          "value": "24d4fd9b038e72e2beaaec1cdf2ab844"
-        },
-        {
-          "name": "ECS_FARGATE",
-          "value": "true"
-        },
-        {
-          "name": "DD_SITE",
-          "value": "datadoghq.com"
-        },
-        {
-          "name": "DD_APM_ENABLED",
-          "value": "true"
-        },
-        {
-          "name": "DD_APM_NON_LOCAL_TRAFFIC",
-          "value": "true"
-        },
-        {
-          "name": "DD_LOGS_ENABLED",
-          "value": "true"
-        },
-        {
-          "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL",
-          "value": "true"
+          "sourceVolume": "cws-instrumentation-volume",
+          "containerPath": "/cws-instrumentation-volume",
+          "readOnly": true
         }
       ],
-      "portMappings": [
+      "linuxParameters": {
+        "capabilities": {
+          "add": [
+            "SYS_PTRACE"
+          ]
+        }
+      },
+      "dependsOn": [
         {
-          "containerPort": 8126,
-          "hostPort": 8126,
-          "protocol": "tcp"
+          "containerName": "datadog-agent",
+          "condition": "HEALTHY"
+        },
+        {
+          "containerName": "cws-instrumentation-init",
+          "condition": "SUCCESS"
         }
       ]
     },
@@ -98,10 +180,9 @@
       }
     }
   ],
-  "requiresCompatibilities": ["FARGATE"],
-  "networkMode": "awsvpc",
-  "cpu": "1024",
-  "memory": "3072",
-  "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}",
-  "taskRoleArn": "${ECS_TASK_ROLE_ARN}"
+  "volumes": [
+    {
+      "name": "cws-instrumentation-volume"
+    }
+  ]
 }
