@@ -23,30 +23,26 @@ phases:
       - sed -i "s|\${ECS_EXECUTION_ROLE_ARN}|${ECS_EXECUTION_ROLE_ARN}|g" taskdef.json
       - sed -i "s|\${ECS_TASK_ROLE_ARN}|${ECS_TASK_ROLE_ARN}|g" taskdef.json
 
-      # Register task definition and retrieve ARN properly
-      - echo "Registering task definition..."
+      # Register task definition properly
+      - echo "Registering new task definition..."
       - |
-        TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query taskDefinition.taskDefinitionArn --output text)
-        echo "TASK_DEFINITION: $TASK_DEFINITION"
+        TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
+        echo "TASK_DEFINITION=$TASK_DEFINITION"
+        if [[ -z "$TASK_DEFINITION" ]]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
 
-      # Ensure task definition ARN is set before proceeding
-      - if [ -z "$TASK_DEFINITION" ]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
-
-      # Create updated AppSpec file with new task definition ARN
+      # Create updated AppSpec file with new task definition ARN (Fixed formatting)
       - echo "Creating updated AppSpec file..."
       - |
-        cat <<EOF > appspec.yaml
-        version: 0.0
-        Resources:
-          - TargetService:
-              Type: AWS::ECS::Service
-              Properties:
-                TaskDefinition: "$TASK_DEFINITION"
-                LoadBalancerInfo:
-                  ContainerName: "loginapp"
-                  ContainerPort: 80
-                PlatformVersion: "LATEST"
-        EOF
+        echo "version: 0.0" > appspec.yaml
+        echo "Resources:" >> appspec.yaml
+        echo "  - TargetService:" >> appspec.yaml
+        echo "      Type: AWS::ECS::Service" >> appspec.yaml
+        echo "      Properties:" >> appspec.yaml
+        echo "        TaskDefinition: \"$TASK_DEFINITION\"" >> appspec.yaml
+        echo "        LoadBalancerInfo:" >> appspec.yaml
+        echo "          ContainerName: \"loginapp\"" >> appspec.yaml
+        echo "          ContainerPort: 80" >> appspec.yaml
+        echo "        PlatformVersion: \"LATEST\"" >> appspec.yaml
 
       # Display generated files for debugging
       - cat imagedefinitions.json
