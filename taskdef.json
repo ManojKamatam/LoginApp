@@ -1,189 +1,249 @@
 {
-  "family": "login-app",
-  "cpu": "1024",
-  "memory": "3072",
-  "networkMode": "awsvpc",
-  "pidMode": "task",
-  "requiresCompatibilities": ["FARGATE"],
-  "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}",
-  "taskRoleArn": "${ECS_TASK_ROLE_ARN}",
-  "containerDefinitions": [
-    {
-      "name": "cws-instrumentation-init",
-      "image": "datadog/cws-instrumentation:latest",
-      "essential": false,
-      "user": "0",
-      "command": [
-        "/cws-instrumentation",
-        "setup",
-        "--cws-volume-mount",
-        "/cws-instrumentation-volume"
-      ],
-      "mountPoints": [
+    "family": "login-app",
+    "containerDefinitions": [
         {
-          "sourceVolume": "cws-instrumentation-volume",
-          "containerPath": "/cws-instrumentation-volume",
-          "readOnly": false
+            "name": "cws-instrumentation-init",
+            "image": "datadog/cws-instrumentation:latest",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": false,
+            "command": [
+                "/cws-instrumentation",
+                "setup",
+                "--cws-volume-mount",
+                "/cws-instrumentation-volume"
+            ],
+            "environment": [],
+            "mountPoints": [
+                {
+                    "sourceVolume": "cws-instrumentation-volume",
+                    "containerPath": "/cws-instrumentation-volume",
+                    "readOnly": false
+                }
+            ],
+            "volumesFrom": [],
+            "user": "0",
+            "systemControls": []
+        },
+        {
+            "name": "datadog-agent",
+            "image": "public.ecr.aws/datadog/agent:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 8126,
+                    "hostPort": 8126,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "DD_APM_NON_LOCAL_TRAFFIC",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_DOCKER_LABELS_AS_TAGS",
+                    "value": "{\"com.amazonaws.ecs.task-definition-family\":\"task_family\",\"com.amazonaws.ecs.container-name\":\"container_name\"}"
+                },
+                {
+                    "name": "DD_APM_INSTRUMENTATION_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_LOGS_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_TAGS",
+                    "value": "env:production,team:dev"
+                },
+                {
+                    "name": "DD_TRACE_AGENT_PORT",
+                    "value": "8126"
+                },
+                {
+                    "name": "DD_API_KEY",
+                    "value": "24d4fd9b038e72e2beaaec1cdf2ab844"
+                },
+                {
+                    "name": "DD_SITE",
+                    "value": "datadoghq.com"
+                },
+                {
+                    "name": "ECS_FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_APM_RECEIVER_PORT",
+                    "value": "8126"
+                },
+                {
+                    "name": "DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED",
+                    "value": "true"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/datadog-agent",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "datadog"
+                }
+            },
+            "healthCheck": {
+                "command": [
+                    "CMD-SHELL",
+                    "/probe.sh"
+                ],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 2,
+                "startPeriod": 60
+            },
+            "systemControls": []
+        },
+        {
+            "name": "loginapp",
+            "image": "${ECR_REPOSITORY_URI}:latest",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "entryPoint": [
+                "dotnet",
+                "LoginApp.dll"
+            ],
+            "environment": [
+                {
+                    "name": "ASPNETCORE_ENVIRONMENT",
+                    "value": "Production"
+                },
+                {
+                    "name": "DD_AGENT_HOST",
+                    "value": "datadog-agent"
+                },
+                {
+                    "name": "DD_VERSION",
+                    "value": "1.0.0"
+                },
+                {
+                    "name": "DD_TRACE_DEBUG",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_SERVICE",
+                    "value": "loginapp"
+                },
+                {
+                    "name": "DD_ENV",
+                    "value": "production"
+                },
+                {
+                    "name": "DD_TRACE_AGENT_PORT",
+                    "value": "8126"
+                },
+                {
+                    "name": "DD_LOG_LEVEL",
+                    "value": "debug"
+                }
+            ],
+            "mountPoints": [
+                {
+                    "sourceVolume": "cws-instrumentation-volume",
+                    "containerPath": "/cws-instrumentation-volume",
+                    "readOnly": true
+                }
+            ],
+            "volumesFrom": [],
+            "linuxParameters": {
+                "capabilities": {
+                    "add": [
+                        "SYS_PTRACE"
+                    ],
+                    "drop": []
+                }
+            },
+            "dependsOn": [
+                {
+                    "containerName": "datadog-agent",
+                    "condition": "HEALTHY"
+                },
+                {
+                    "containerName": "cws-instrumentation-init",
+                    "condition": "SUCCESS"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awsfirelens",
+                "options": {
+                    "dd_service": "loginapp",
+                    "Host": "http-intake.logs.datadoghq.com",
+                    "TLS": "on",
+                    "dd_source": "aspnetcore",
+                    "apikey": "24d4fd9b038e72e2beaaec1cdf2ab844",
+                    "Name": "datadog"
+                }
+            },
+            "systemControls": []
+        },
+        {
+            "name": "log-router",
+            "image": "amazon/aws-for-fluent-bit:latest",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "user": "0",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/login-router",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "logrouter"
+                }
+            },
+            "systemControls": [],
+            "firelensConfiguration": {
+                "type": "fluentbit"
+            }
         }
-      ]
-    },
-    {
-      "name": "datadog-agent",
-      "image": "public.ecr.aws/datadog/agent:latest",
-      "essential": true,
-      "environment": [
+    ],
+    "taskRoleArn": "${ECS_TASK_ROLE_ARN}",
+    "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}",
+    "networkMode": "awsvpc",
+    "volumes": [
         {
-          "name": "DD_API_KEY",
-          "value": "24d4fd9b038e72e2beaaec1cdf2ab844"
-        },
-        {
-          "name": "DD_SITE",
-          "value": "datadoghq.com"
-        },
-        {
-          "name": "ECS_FARGATE",
-          "value": "true"
-        },
-        {
-          "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED",
-          "value": "true"
-        },
-        {
-          "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED",
-          "value": "true"
-        },
-        {
-          "name": "DD_APM_ENABLED",
-          "value": "true"
-        },
-        {
-          "name": "DD_APM_NON_LOCAL_TRAFFIC",
-          "value": "true"
-        },
-        {
-          "name": "DD_LOGS_ENABLED",
-          "value": "true"
-        },
-        {
-          "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL",
-          "value": "true"
-        },
-        {
-          "name": "DD_TRACE_AGENT_PORT",
-          "value": "8126"
-        },
-        {
-          "name": "DD_APM_RECEIVER_PORT",
-          "value": "8126"
+            "name": "cws-instrumentation-volume",
+            "host": {}
         }
-      ],
-      "portMappings": [
-        {
-          "containerPort": 8126,
-          "hostPort": 8126,
-          "protocol": "tcp"
-        }
-      ],
-      "healthCheck": {
-        "command": [
-          "CMD-SHELL",
-          "/probe.sh"
-        ],
-        "interval": 30,
-        "timeout": 5,
-        "retries": 2,
-        "startPeriod": 60
-      }
-    },
-    {
-      "name": "loginapp",
-      "image": "${ECR_REPOSITORY_URI}:latest",
-      "essential": true,
-      "entryPoint": [
-        "/cws-instrumentation-volume/cws-instrumentation",
-        "trace",
-        "--",
-        "dotnet",
-        "/app/LoginApp.dll" 
-      ],
-      "portMappings": [
-        {
-          "containerPort": 80,
-          "hostPort": 80,
-          "protocol": "tcp"
-        }
-      ],
-      "environment": [
-        {
-          "name": "ASPNETCORE_ENVIRONMENT",
-          "value": "Production"
-        },
-        {
-          "name": "DD_AGENT_HOST",
-          "value": "127.0.0.1"
-        },
-        {
-          "name": "DD_ENV",
-          "value": "production"
-        },
-        {
-          "name": "DD_SERVICE",
-          "value": "loginapp"
-        },
-        {
-          "name": "DD_VERSION",
-          "value": "1.0.0"
-        }
-      ],
-      "logConfiguration": {
-        "logDriver": "awsfirelens",
-        "options": {
-          "Name": "datadog",
-          "Host": "http-intake.logs.datadoghq.com",
-          "TLS": "on",
-          "apikey": "24d4fd9b038e72e2beaaec1cdf2ab844",
-          "dd_service": "loginapp",
-          "dd_source": "aspnetcore",
-          "dd_env": "production"
-        }
-      },
-      "mountPoints": [
-        {
-          "sourceVolume": "cws-instrumentation-volume",
-          "containerPath": "/cws-instrumentation-volume",
-          "readOnly": true
-        }
-      ],
-      "linuxParameters": {
-        "capabilities": {
-          "add": [
-            "SYS_PTRACE"
-          ]
-        }
-      },
-      "dependsOn": [
-        {
-          "containerName": "datadog-agent",
-          "condition": "HEALTHY"
-        },
-        {
-          "containerName": "cws-instrumentation-init",
-          "condition": "SUCCESS"
-        }
-      ]
-    },
-    {
-      "name": "log-router",
-      "image": "amazon/aws-for-fluent-bit:latest",
-      "essential": true,
-      "firelensConfiguration": {
-        "type": "fluentbit"
-      }
-    }
-  ],
-  "volumes": [
-    {
-      "name": "cws-instrumentation-volume"
-    }
-  ]
+    ],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "3072",
+    "pidMode": "task"
 }
