@@ -10,6 +10,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="8.0.0" />
     <PackageReference Include="Datadog.Trace" Version="2.36.0" />
-    <PackageReference Include="Datadog.Trace.AspNet" Version="2.36.0" />
   </ItemGroup>
+
 </Project>
