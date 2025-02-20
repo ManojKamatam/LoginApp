@@ -13,9 +13,6 @@ builder.Host.ConfigureServices(services =>
     });
 });
 
-// Add Datadog Tracing
-builder.Services.AddDatadogTracing();
-
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
@@ -45,8 +42,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Add Datadog TracingMiddleware early in the pipeline
-app.UseDatadogTracing();
+// Add Datadog middleware
+app.Use(async (context, next) =>
+{
+    using (var scope = Tracer.Instance.StartActive("web.request"))
+    {
+        scope.Span.ServiceName = "LoginApp";
+        scope.Span.ResourceName = $"{context.Request.Method} {context.Request.Path}";
+        await next();
+    }
+});
 
 app.UseStaticFiles();
 app.UseRouting();
@@ -57,7 +62,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Login}/{id?}");
 
-// Enhanced application lifetime handling
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 app.Lifetime.ApplicationStarted.Register(() =>
@@ -68,7 +72,6 @@ app.Lifetime.ApplicationStarted.Register(() =>
 app.Lifetime.ApplicationStopping.Register(() =>
 {
     logger.LogInformation("Application is stopping at: {time}", DateTimeOffset.UtcNow);
-    // Add delay to allow in-flight requests to complete
     Thread.Sleep(5000);
 });
 
