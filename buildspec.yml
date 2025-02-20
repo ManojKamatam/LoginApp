@@ -27,7 +27,7 @@ phases:
       - echo "Registering new task definition..."
       - TASK_DEFINITION=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --query "taskDefinition.taskDefinitionArn" --output text)
       - echo "TASK_DEFINITION=$TASK_DEFINITION"
-      - if [[ -z "$TASK_DEFINITION" ]]; then echo "ERROR: Task definition registration failed!" && exit 1; fi
+      - "if [[ -z \"$TASK_DEFINITION\" ]]; then echo \"ERROR: Task definition registration failed!\" && exit 1; fi"
 
       # Ensure ECS service uses this task definition
       - echo "Updating ECS service to use Task Definition: $TASK_DEFINITION"
