@@ -139,16 +139,8 @@
                   "value": "1"
                 },
                 {
-                  "name": "DD_DOTNET_TRACER_HOME",
-                  "value": "/opt/datadog"
-                },
-                {
                   "name": "DD_TRACE_DEBUG",
                   "value": "true"
-                },
-                {
-                  "name": "DD_TRACE_LOGGING_LEVEL",
-                  "value": "debug"
                 },
                 {
                   "name": "DD_TRACE_AGENT_PORT",
@@ -157,18 +149,6 @@
                 {
                   "name": "DD_AGENT_HOST",
                   "value": "datadog-agent"
-                },
-                {
-                  "name": "DD_ENV",
-                  "value": "production"
-                },
-                {
-                  "name": "DD_SERVICE",
-                  "value": "LoginApp"
-                },
-                {
-                  "name": "DD_VERSION",
-                  "value": "1.0.0"
                 }
             ],
             "mountPoints": [
