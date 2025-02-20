@@ -1,3 +1,4 @@
+using Datadog.Trace;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 
@@ -12,13 +13,16 @@ builder.Host.ConfigureServices(services =>
     });
 });
 
+// Add Datadog Tracing
+builder.Services.AddDatadogTracing();
+
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
 // Configure Data Protection with minimum key lifetime
 builder.Services.AddDataProtection()
     .SetApplicationName("LoginApp")
-    .SetDefaultKeyLifetime(TimeSpan.FromDays(7)); // Minimum allowed is 7 days
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(7));
 
 // Add Authentication with secure cookie settings
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -40,6 +44,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+// Add Datadog TracingMiddleware early in the pipeline
+app.UseDatadogTracing();
 
 app.UseStaticFiles();
 app.UseRouting();
