@@ -12,3 +12,4 @@
     <PackageReference Include="Datadog.Trace" Version="2.36.0" />
     <PackageReference Include="Datadog.Trace.AspNet" Version="2.36.0" />
   </ItemGroup>
+</Project>
