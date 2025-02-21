@@ -53,11 +53,11 @@
                 { "name": "DD_REMOTE_CONFIGURATION_ENABLED", "value": "false" },
                 { "name": "DD_APM_IGNORE_RESOURCES", "value": "/health,/ping" },
                 { "name": "DD_DOGSTATSD_NON_LOCAL_TRAFFIC", "value": "true" },
-                { "name": "DD_NETWORK_MONITORING_ENABLED", "value": "true" },
                 { "name": "DD_HOSTNAME", "value": "loginapp" },
                 { "name": "DD_LOG_LEVEL", "value": "debug" },
                 { "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED", "value": "true" },
-                { "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED", "value": "true" }
+                { "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED", "value": "true" },
+                {"name": "DD_LOGS_INJECTION", "value": "true"}
             ],
             "mountPoints": [],
             "volumesFrom": [],
@@ -110,7 +110,9 @@
                 { "name": "CORECLR_ENABLE_PROFILING", "value": "1" },
                 { "name": "CORECLR_PROFILER", "value": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}" },
                 { "name": "CORECLR_PROFILER_PATH", "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so" },
-                { "name": "DD_TRACE_AGENT_URL", "value": "http://127.0.0.1:8126" }
+                { "name": "DD_TRACE_AGENT_URL", "value": "http://127.0.0.1:8126" },
+                {"name": "DD_PROFILING_ENABLED", "value": "true"},
+                {"name": "DD_PROFILING_LOG_LEVEL", "value": "debug"}
             ],
             "dockerLabels": {
               "com.datadoghq.tags.env": "production",
