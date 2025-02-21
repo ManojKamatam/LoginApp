@@ -44,6 +44,7 @@
                 { "name": "ECS_FARGATE", "value": "true" },
                 { "name": "DD_APM_INSTRUMENTATION_ENABLED", "value": "true" },
                 { "name": "DD_LOGS_ENABLED", "value": "true" },
+                { "name": "DD_LOG_LEVEL", "value": "debug" },
                 { "name": "DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED", "value": "true" },
                 { "name": "DD_PROCESS_CONFIG_CONTAINER_COLLECTION_ENABLED", "value": "true" },
                 { "name": "DD_TAGS", "value": "env:production,team:dev,task_family:login-app" },
