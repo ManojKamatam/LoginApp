@@ -57,8 +57,7 @@
                 { "name": "DD_HOSTNAME", "value": "loginapp" },
                 { "name": "DD_LOG_LEVEL", "value": "debug" },
                 { "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED", "value": "true" },
-                { "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED", "value": "true" },
-                { "name": "DD_SERVICE_MONITORING_ENABLED", "value": "true" }
+                { "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED", "value": "true" }
             ],
             "mountPoints": [],
             "volumesFrom": [],
@@ -113,6 +112,11 @@
                 { "name": "CORECLR_PROFILER_PATH", "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so" },
                 { "name": "DD_TRACE_AGENT_URL", "value": "http://127.0.0.1:8126" }
             ],
+            "dockerLabels": {
+              "com.datadoghq.tags.env": "production",
+              "com.datadoghq.tags.service": "loginapp",
+              "com.datadoghq.tags.version": "1.0.0"
+            },
             "mountPoints": [
                 {
                     "sourceVolume": "cws-instrumentation-volume",
