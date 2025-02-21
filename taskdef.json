@@ -49,11 +49,12 @@
                 { "name": "DD_TAGS", "value": "env:production,team:dev,task_family:login-app" },
                 { "name": "DD_APM_NON_LOCAL_TRAFFIC", "value": "true" },
                 { "name": "ECS_CONTAINER_METADATA_URI_V4", "value": "http://169.254.170.2/v4/" },
-                { "name": "DD_REMOTE_CONFIGURATION_ENABLED", "value": "true" },
+                { "name": "DD_REMOTE_CONFIGURATION_ENABLED", "value": "false" },
                 { "name": "DD_APM_IGNORE_RESOURCES", "value": "/health,/ping" },
                 { "name": "DD_DOGSTATSD_NON_LOCAL_TRAFFIC", "value": "true" },
-                { "name": "DD_SYSTEM_PROBE_ENABLED", "value": "false" }
-
+                { "name": "DD_SYSTEM_PROBE_ENABLED", "value": "true" },
+                { "name": "DD_HOSTNAME", "value": "login-app-task" },
+                { "name": "DD_LOG_LEVEL", "value": "debug" }
             ],
             "mountPoints": [],
             "volumesFrom": [],
