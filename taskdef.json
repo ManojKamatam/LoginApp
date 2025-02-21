@@ -40,7 +40,7 @@
             "environment": [
                 { "name": "DD_API_KEY", "value": "24d4fd9b038e72e2beaaec1cdf2ab844" },
                 { "name": "DD_SITE", "value": "datadoghq.com" },
-                { "name": "DD_TRACE_AGENT_URL", "value": "http://169.254.170.2:8126" },
+                { "name": "DD_TRACE_AGENT_URL", "value": "http://127.0.0.1:8126" },
                 { "name": "ECS_FARGATE", "value": "true" },
                 { "name": "DD_APM_INSTRUMENTATION_ENABLED", "value": "true" },
                 { "name": "DD_LOGS_ENABLED", "value": "true" },
@@ -111,7 +111,7 @@
                 { "name": "CORECLR_ENABLE_PROFILING", "value": "1" },
                 { "name": "CORECLR_PROFILER", "value": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}" },
                 { "name": "CORECLR_PROFILER_PATH", "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so" },
-                { "name": "DD_TRACE_AGENT_URL", "value": "http://169.254.170.2:8126" }
+                { "name": "DD_TRACE_AGENT_URL", "value": "http://127.0.0.1:8126" }
             ],
             "mountPoints": [
                 {
