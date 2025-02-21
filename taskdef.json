@@ -40,20 +40,18 @@
             "environment": [
                 { "name": "DD_API_KEY", "value": "d6968e83-d28f-4074-9819-8f999753b9a4" },
                 { "name": "DD_SITE", "value": "datadoghq.com" },
-                { "name": "DD_AGENT_HOST", "value": "169.254.170.2" },
                 { "name": "DD_TRACE_AGENT_URL", "value": "http://169.254.170.2:8126" },
                 { "name": "ECS_FARGATE", "value": "true" },
                 { "name": "DD_APM_ENABLED", "value": "true" },
                 { "name": "DD_LOGS_ENABLED", "value": "true" },
-                { "name": "DD_PROCESS_AGENT_ENABLED", "value": "true" },
                 { "name": "DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED", "value": "true" },
+                { "name": "DD_PROCESS_CONFIG_CONTAINER_COLLECTION_ENABLED", "value": "true" },
                 { "name": "DD_TAGS", "value": "env:production,team:dev,task_family:login-app" },
                 { "name": "DD_APM_NON_LOCAL_TRAFFIC", "value": "true" },
                 { "name": "ECS_CONTAINER_METADATA_URI_V4", "value": "http://169.254.170.2/v4/" },
                 { "name": "DD_REMOTE_CONFIGURATION_ENABLED", "value": "true" },
                 { "name": "DD_APM_IGNORE_RESOURCES", "value": "/health,/ping" },
                 { "name": "DD_DOGSTATSD_NON_LOCAL_TRAFFIC", "value": "true" },
-                { "name": "DD_REMOTE_CONFIG_POLL_INTERVAL", "value": "10" },
                 { "name": "DD_SYSTEM_PROBE_ENABLED", "value": "false" }
 
             ],
@@ -96,7 +94,6 @@
                 "LoginApp.dll"
             ],
             "environment": [
-                { "name": "DD_AGENT_HOST", "value": "169.254.170.2" },
                 { "name": "DD_SERVICE", "value": "loginapp" },
                 { "name": "DD_ENV", "value": "production" },
                 { "name": "DD_VERSION", "value": "1.0.0" },
