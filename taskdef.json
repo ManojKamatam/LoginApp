@@ -51,7 +51,28 @@
                 { "name": "DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED", "value": "true" },
                 { "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL", "value": "true" },
                 { "name": "ECS_CONTAINER_METADATA_URI_V4", "value": "http://169.254.170.2/v4/" },
-                { "name": "DD_TRACE_AGENT_PORT", "value": "8126" }
+                { "name": "DD_TRACE_AGENT_PORT", "value": "8126" },
+                {
+                    "name": "DD_ECS_FARGATE",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_DOGSTATSD_NON_LOCAL_TRAFFIC",
+                    "value": "true"
+                },
+                {
+                    "name": "ECS_CONTAINER_METADATA_URI_V4",
+                    "value": "http://169.254.170.2/v4/"
+                },
+                {
+                    "name": "DD_PROCESS_AGENT_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "DD_REMOTE_CONFIGURATION_ENABLED",
+                    "value": "true"
+                }
+
             ],
             "mountPoints": [],
             "volumesFrom": [],
@@ -103,7 +124,12 @@
                 { "name": "DD_TRACE_AGENT_PORT", "value": "8126" },
                 { "name": "CORECLR_ENABLE_PROFILING", "value": "1" },
                 { "name": "CORECLR_PROFILER", "value": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}" },
-                { "name": "CORECLR_PROFILER_PATH", "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so" }
+                { "name": "CORECLR_PROFILER_PATH", "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so" },
+                {
+                    "name": "DD_TRACE_AGENT_URL",
+                    "value": "http://datadog-agent:8126"
+                }
+
             ],
             "mountPoints": [
                 {
