@@ -13,7 +13,6 @@ namespace LoginApp.Controllers
         {
             return View();
         }
-
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -27,32 +26,19 @@ namespace LoginApp.Controllers
                         new Claim(ClaimTypes.Name, model.Username),
                         new Claim(ClaimTypes.Role, "User")
                     };
-
+        
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var authProperties = new AuthenticationProperties
-                    {
-                        IsPersistent = model.RememberMe
-                    };
-
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity),
-                        authProperties);
-
+                        new ClaimsPrincipal(claimsIdentity));
+        
                     return RedirectToAction("Login", "Account");
                 }
-
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+        
+                ModelState.AddModelError(string.Empty, "Invalid username or password");
             }
-
+        
             return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Login");
-        }
+        } 
     }
 }
