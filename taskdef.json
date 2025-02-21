@@ -38,62 +38,20 @@
             ],
             "essential": true,
             "environment": [
-                {
-                    "name": "DD_APM_NON_LOCAL_TRAFFIC",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_DOCKER_LABELS_AS_TAGS",
-                    "value": "{\"com.amazonaws.ecs.task-definition-family\":\"task_family\",\"com.amazonaws.ecs.container-name\":\"container_name\"}"
-                },
-                {
-                    "name": "DD_APM_INSTRUMENTATION_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_LOGS_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_TAGS",
-                    "value": "env:production,team:dev"
-                },
-                {
-                    "name": "DD_TRACE_AGENT_PORT",
-                    "value": "8126"
-                },
-                {
-                    "name": "DD_API_KEY",
-                    "value": "24d4fd9b038e72e2beaaec1cdf2ab844"
-                },
-                {
-                    "name": "DD_SITE",
-                    "value": "datadoghq.com"
-                },
-                {
-                    "name": "ECS_FARGATE",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_APM_RECEIVER_PORT",
-                    "value": "8126"
-                },
-                {
-                    "name": "DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED",
-                    "value": "true"
-                }
+                { "name": "DD_API_KEY", "value": "24d4fd9b038e72e2beaaec1cdf2ab844" },
+                { "name": "DD_SITE", "value": "datadoghq.com" },
+                { "name": "ECS_FARGATE", "value": "true" },
+                { "name": "DD_APM_ENABLED", "value": "true" },
+                { "name": "DD_LOGS_ENABLED", "value": "true" },
+                { "name": "DD_PROCESS_AGENT_ENABLED", "value": "true" },
+                { "name": "DD_TAGS", "value": "env:production,team:dev,task_family:${ECS_TASK_FAMILY}" },
+                { "name": "DD_APM_NON_LOCAL_TRAFFIC", "value": "true" },
+                { "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED", "value": "true" },
+                { "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED", "value": "true" },
+                { "name": "DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED", "value": "true" },
+                { "name": "DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL", "value": "true" },
+                { "name": "ECS_CONTAINER_METADATA_URI_V4", "value": "http://169.254.170.2/v4/" },
+                { "name": "DD_TRACE_AGENT_PORT", "value": "8126" }
             ],
             "mountPoints": [],
             "volumesFrom": [],
@@ -134,50 +92,18 @@
                 "LoginApp.dll"
             ],
             "environment": [
-                {
-                    "name": "CORECLR_ENABLE_PROFILING",
-                    "value": "1"
-                },
-                {
-                    "name": "CORECLR_PROFILER",
-                    "value": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}"
-                },
-                {
-                    "name": "CORECLR_PROFILER_PATH",
-                    "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so"
-                },
-                {
-                    "name": "DD_TRACE_ENABLED",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_TRACE_DEBUG",
-                    "value": "true"
-                },
-                {
-                    "name": "DD_TRACE_AGENT_PORT",
-                    "value": "8126"
-                },
-                {
-                    "name": "DD_AGENT_HOST",
-                    "value": "datadog-agent"
-                },
-                {
-                    "name": "DD_SERVICE",
-                    "value": "loginapp"
-                },
-                {
-                    "name": "DD_ENV",
-                    "value": "production"
-                },
-                {
-                    "name": "DD_VERSION",
-                    "value": "1.0.0"
-                },
-                {
-                    "name": "DD_LOG_LEVEL",
-                    "value": "debug"
-                }
+                { "name": "DD_AGENT_HOST", "value": "datadog-agent" },
+                { "name": "DD_SERVICE", "value": "loginapp" },
+                { "name": "DD_ENV", "value": "production" },
+                { "name": "DD_VERSION", "value": "1.0.0" },
+                { "name": "DD_LOG_LEVEL", "value": "debug" },
+                { "name": "DD_APM_INSTRUMENTATION_ENABLED", "value": "true" },
+                { "name": "DD_TRACE_ENABLED", "value": "true" },
+                { "name": "DD_TRACE_DEBUG", "value": "true" },
+                { "name": "DD_TRACE_AGENT_PORT", "value": "8126" },
+                { "name": "CORECLR_ENABLE_PROFILING", "value": "1" },
+                { "name": "CORECLR_PROFILER", "value": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}" },
+                { "name": "CORECLR_PROFILER_PATH", "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so" }
             ],
             "mountPoints": [
                 {
