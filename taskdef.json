@@ -47,19 +47,18 @@
                 { "name": "DD_LOG_LEVEL", "value": "debug" },
                 { "name": "DD_PROCESS_CONFIG_PROCESS_COLLECTION_ENABLED", "value": "true" },
                 { "name": "DD_PROCESS_CONFIG_CONTAINER_COLLECTION_ENABLED", "value": "true" },
-                { "name": "DD_TAGS", "value": "env:production,team:dev,task_family:login-app" },
                 { "name": "DD_APM_NON_LOCAL_TRAFFIC", "value": "true" },
                 { "name": "ECS_CONTAINER_METADATA_URI_V4", "value": "http://169.254.170.2/v4/" },
                 { "name": "DD_REMOTE_CONFIGURATION_ENABLED", "value": "false" },
                 { "name": "DD_APM_IGNORE_RESOURCES", "value": "/health,/ping" },
                 { "name": "DD_DOGSTATSD_NON_LOCAL_TRAFFIC", "value": "true" },
                 { "name": "DD_SYSTEM_PROBE_ENABLED", "value": "true" },
-                { "name": "DD_UNIVERSAL_SERVICE_MONITORING_ENABLED", "value": "true" },
                 { "name": "DD_HOSTNAME", "value": "loginapp" },
                 { "name": "DD_LOG_LEVEL", "value": "debug" },
                 { "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED", "value": "true" },
+                { "name": "DD_TAGS", "value": "env:production,team:dev,task_family:login-app,service:loginapp,version:1.0.0" },
                 { "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED", "value": "true" },
-                { "name": "DD_SERVICE_MONITORING_ENABLED", "value": "true" }
+                { "name": "DD_PROFILING_ENABLED", "value": "true" }
             ],
             "mountPoints": [],
             "volumesFrom": [],
@@ -114,7 +113,8 @@
                 { "name": "CORECLR_PROFILER_PATH", "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so" },
                 { "name": "DD_TRACE_AGENT_URL", "value": "http://127.0.0.1:8126" },
                 { "name": "DD_LOGS_INJECTION", "value": "true"},
-                { "name": "DD_PROFILING_ENABLED", "value": "true" }
+                { "name": "DD_PROFILING_ENABLED", "value": "true" },
+                { "name": "DD_AGENT_HOST", "value": "127.0.0.1" }
             ],
             "dockerLabels": {
               "com.datadoghq.tags.env": "production",
