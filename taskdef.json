@@ -2,30 +2,6 @@
     "family": "login-app",
     "containerDefinitions": [
         {
-            "name": "cws-instrumentation-init",
-            "image": "datadog/cws-instrumentation:latest",
-            "cpu": 0,
-            "portMappings": [],
-            "essential": false,
-            "command": [
-                "/cws-instrumentation",
-                "setup",
-                "--cws-volume-mount",
-                "/cws-instrumentation-volume"
-            ],
-            "environment": [],
-            "mountPoints": [
-                {
-                    "sourceVolume": "cws-instrumentation-volume",
-                    "containerPath": "/cws-instrumentation-volume",
-                    "readOnly": false
-                }
-            ],
-            "volumesFrom": [],
-            "user": "0",
-            "systemControls": []
-        },
-        {
             "name": "datadog-agent",
             "image": "public.ecr.aws/datadog/agent:latest",
             "cpu": 0,
@@ -36,9 +12,9 @@
                     "protocol": "tcp"
                 }
             ],
-            "essential": true,
+            "essential": false,
             "environment": [
-                { "name": "DD_API_KEY", "value": "24d4fd9b038e72e2beaaec1cdf2ab844" },
+                { "name": "DD_API_KEY", "value": "b3de4477f1b35e21a2ae041ecf568bf0" },
                 { "name": "DD_SITE", "value": "datadoghq.com" },
                 { "name": "DD_TRACE_AGENT_URL", "value": "http://127.0.0.1:8126" },
                 { "name": "ECS_FARGATE", "value": "true" },
@@ -49,19 +25,12 @@
                 { "name": "DD_PROCESS_CONFIG_CONTAINER_COLLECTION_ENABLED", "value": "true" },
                 { "name": "DD_APM_NON_LOCAL_TRAFFIC", "value": "true" },
                 { "name": "ECS_CONTAINER_METADATA_URI_V4", "value": "http://169.254.170.2/v4/" },
-                { "name": "DD_REMOTE_CONFIGURATION_ENABLED", "value": "false" },
                 { "name": "DD_APM_IGNORE_RESOURCES", "value": "/health,/ping" },
                 { "name": "DD_DOGSTATSD_NON_LOCAL_TRAFFIC", "value": "true" },
-                { "name": "DD_SYSTEM_PROBE_ENABLED", "value": "false" },
-                { "name": "DD_SYSTEM_PROBE_EXTERNAL", "value": "false" },
-                { "name": "DD_HOSTNAME", "value": "loginapp" },
+                { "name": "DD_HOSTNAME", "value": "loginappp" },
                 { "name": "DD_LOG_LEVEL", "value": "debug" },
-                { "name": "DD_RUNTIME_SECURITY_CONFIG_ENABLED", "value": "true" },
-                { "name": "DD_TAGS", "value": "env:production,team:dev,task_family:login-app,service:loginapp,version:1.0.0" },
-                { "name": "DD_RUNTIME_SECURITY_CONFIG_EBPFLESS_ENABLED", "value": "true" }
+                { "name": "DD_TAGS", "value": "env:production1,team:dev,task_family:login-app,service:loginappp,version:1.0.1" }
             ],
-            "mountPoints": [],
-            "volumesFrom": [],
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
@@ -99,35 +68,26 @@
                 "LoginApp.dll"
             ],
             "environment": [
-                { "name": "DD_SERVICE", "value": "loginapp" },
-                { "name": "DD_ENV", "value": "production" },
-                { "name": "DD_VERSION", "value": "1.0.0" },
+                { "name": "DD_SERVICE", "value": "loginappp" },
+                { "name": "DD_ENV", "value": "production1" },
+                { "name": "DD_VERSION", "value": "1.0.1" },
                 { "name": "DD_APM_INSTRUMENTATION_ENABLED", "value": "true" },
                 { "name": "DD_TRACE_ENABLED", "value": "true" },
                 { "name": "DD_TRACE_DEBUG", "value": "true" },
                 { "name": "DD_TRACE_AGENT_PORT", "value": "8126" },
                 { "name": "DD_TRACE_STARTUP_LOGS", "value": "true" },
-                { "name": "DD_APM_ANALYZED_SPANS", "value": "loginapp|http.request:1" },
+                { "name": "DD_APM_ANALYZED_SPANS", "value": "loginappp|http.request:1" },
                 { "name": "CORECLR_ENABLE_PROFILING", "value": "1" },
                 { "name": "CORECLR_PROFILER", "value": "{846F5F1C-F9AE-4B07-969E-05C26BC060D8}" },
-                { "name": "CORECLR_PROFILER_PATH", "value": "/opt/datadog/Datadog.Trace.ClrProfiler.Native.so" },
                 { "name": "DD_TRACE_AGENT_URL", "value": "http://127.0.0.1:8126" },
                 { "name": "DD_LOGS_INJECTION", "value": "true" },
                 { "name": "DD_AGENT_HOST", "value": "127.0.0.1" }
             ],
             "dockerLabels": {
-              "com.datadoghq.tags.env": "production",
-              "com.datadoghq.tags.service": "loginapp",
-              "com.datadoghq.tags.version": "1.0.0"
+              "com.datadoghq.tags.env": "production1",
+              "com.datadoghq.tags.service": "loginappp",
+              "com.datadoghq.tags.version": "1.0.1"
             },
-            "mountPoints": [
-                {
-                    "sourceVolume": "cws-instrumentation-volume",
-                    "containerPath": "/cws-instrumentation-volume",
-                    "readOnly": true
-                }
-            ],
-            "volumesFrom": [],
             "linuxParameters": {
                 "capabilities": {
                     "add": [
@@ -136,16 +96,6 @@
                     "drop": []
                 }
             },
-            "dependsOn": [
-                {
-                    "containerName": "datadog-agent",
-                    "condition": "HEALTHY"
-                },
-                {
-                    "containerName": "cws-instrumentation-init",
-                    "condition": "SUCCESS"
-                }
-            ],
             "logConfiguration": {
                 "logDriver": "awsfirelens",
                 "options": {
@@ -186,12 +136,6 @@
     "taskRoleArn": "${ECS_TASK_ROLE_ARN}",
     "executionRoleArn": "${ECS_EXECUTION_ROLE_ARN}",
     "networkMode": "awsvpc",
-    "volumes": [
-        {
-            "name": "cws-instrumentation-volume",
-            "host": {}
-        }
-    ],
     "placementConstraints": [],
     "requiresCompatibilities": [
         "FARGATE"
